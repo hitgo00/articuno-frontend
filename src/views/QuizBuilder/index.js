@@ -6,6 +6,7 @@ import { Button, Typography } from '@material-ui/core';
 
 const QuizBuilder = () => {
   const [quizCode, setQuizCode] = useState(null);
+  const [ViewSubmissionCode, setViewSubmissionCode] = useState(null);
   const [questionsList, setQuestionList] = useState([]);
   const addQuestion = (questionDetails) => {
     setQuestionList(questionsList.concat(questionDetails));
@@ -31,7 +32,8 @@ const QuizBuilder = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log('Success:', data);
-        setQuizCode(data);
+        setQuizCode(data['QuizCode']);
+        setViewSubmissionCode(data['ViewSubmissionCode']);
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -42,7 +44,9 @@ const QuizBuilder = () => {
     <div className="mt-20 ml-64">
       {quizCode ? (
         <Typography className="font-thin">
-          Your quiz code is: {quizCode}
+          Your quiz code is: {quizCode} <br />
+          To view submissions for this quiz, note this submission code:{' '}
+          {ViewSubmissionCode}
         </Typography>
       ) : (
         <>
