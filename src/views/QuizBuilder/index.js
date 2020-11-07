@@ -1,43 +1,11 @@
 import React, { useState } from 'react';
 import _ from 'lodash';
 import QuestionCard from '../../components/QuestionCard';
-import QuestionPreview from '../../components/QuestionPreview';
-
-const QuestionHandler = (props) => {
-  const { questionDetail, addQuestion, onRemove, onEdit } = props;
-
-  const [mode, setMode] = useState('PREVIEW');
-  const onAddQuestion = (questionDetails) => {
-    addQuestion({ questionDetails });
-    setMode('PREVIEW');
-  };
-
-  const onDoneClick = (questionDetail, oldId) => {
-    onEdit(questionDetail, oldId);
-    setMode('PREVIEW');
-  };
-
-  return (
-    <>
-      {mode === 'EDIT' ? (
-        <QuestionCard
-          questionDetail={questionDetail}
-          addQuestion={onAddQuestion}
-          onRemove={onRemove}
-          onEdit={onDoneClick}
-        />
-      ) : (
-        <QuestionPreview
-          questionDetail={questionDetail}
-          onEdit={() => setMode('EDIT')}
-          onRemove={onRemove}
-        />
-      )}
-    </>
-  );
-};
+import QuestionHandler from '../../components/QuestionHandler';
+import { Button, Typography } from '@material-ui/core';
 
 const QuizBuilder = () => {
+  const [quizCode, setQuizCode] = useState(null);
   const [questionsList, setQuestionList] = useState([]);
   const addQuestion = (questionDetails) => {
     setQuestionList(questionsList.concat(questionDetails));
@@ -52,34 +20,54 @@ const QuizBuilder = () => {
     setQuestionList(newList.concat(questionDetail));
   };
 
+  const onSubmit = () => {
+    fetch('http://localhost:4949/addQuiz', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(questionsList),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
+        setQuizCode(data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
+
   return (
     <div className="mt-20 ml-64">
-      {questionsList.map((questionDetail, index) => (
-        <QuestionHandler
-          addQuestion={addQuestion}
-          onRemove={onRemove}
-          onEdit={onEdit}
-          questionDetail={questionDetail}
-        />
-      ))}
-      {/* <QuestionHandler index={questionsList.length} addQuestion={addQuestion} /> */}
-      {/* <QuestionPreview
-        question={'What is the name of ..?'}
-        answer={'The correct answer is ...'}
-        score={20}
-      />
-      <QuestionPreview
-        question={'What is the name of ..?'}
-        answer={'The correct answer is ...'}
-        score={20}
-      /> */}
-      {/* <QuestionCard
-        question={'What is the name of ..?'}
-        answer={'The correct answer is ...'}
-        score={20}
-        addQuestion={addQuestion}
-      /> */}
-      <QuestionCard questionDetail={{}} addQuestion={addQuestion} />
+      {quizCode ? (
+        <Typography className="font-thin">
+          Your quiz code is: {quizCode}
+        </Typography>
+      ) : (
+        <>
+          {questionsList.map((questionDetail) => (
+            <QuestionHandler
+              key={questionDetail.id}
+              addQuestion={addQuestion}
+              onRemove={onRemove}
+              onEdit={onEdit}
+              questionDetail={questionDetail}
+            />
+          ))}
+          <QuestionCard questionDetail={{}} addQuestion={addQuestion} />
+          {questionsList.length ? (
+            <Button
+              onClick={onSubmit}
+              className="absolute bottom-0 right-0 mr-4 mb-4 text-2xl"
+            >
+              Create
+            </Button>
+          ) : (
+            ''
+          )}
+        </>
+      )}
     </div>
   );
 };

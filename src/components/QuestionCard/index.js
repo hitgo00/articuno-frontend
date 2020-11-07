@@ -35,7 +35,6 @@ const QuizCard = (props) => {
   };
 
   const onAdd = () => {
-    console.log(id);
     if (quesText && ansText && quesScore) {
       addQuestion({
         question: quesText,
