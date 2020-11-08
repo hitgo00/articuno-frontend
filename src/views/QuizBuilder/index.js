@@ -60,7 +60,7 @@ const QuizBuilder = () => {
             />
           ))}
           <QuestionCard questionDetail={{}} addQuestion={addQuestion} />
-          {questionsList.length ? (
+          {questionsList.length > 1 ? (
             <Button
               onClick={onSubmit}
               className="absolute bottom-0 right-0 mr-4 mb-4 text-2xl"

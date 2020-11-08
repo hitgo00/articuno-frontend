@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import _, { debounce } from 'lodash';
 import { makeStyles } from '@material-ui/core/styles';
 import c from 'classnames';
 import { css } from 'emotion';
@@ -11,6 +11,22 @@ import {
   Tabs,
   Button,
 } from '@material-ui/core';
+
+import * as handpose from '@tensorflow-models/handpose';
+import * as tf from '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-backend-webgl';
+let model;
+let ctx;
+// const stats = new Stats();
+let rafID;
+
+const fingerLookupIndices = {
+  thumb: [0, 1, 2, 3, 4],
+  indexFinger: [0, 5, 6, 7, 8],
+  middleFinger: [0, 9, 10, 11, 12],
+  ringFinger: [0, 13, 14, 15, 16],
+  pinky: [0, 17, 18, 19, 20],
+};
 
 const quizCard = css`
   width: 300px;
@@ -75,6 +91,7 @@ const AnswerHandler = (props) => {
     </TabPanel>
   );
 };
+
 export default function VerticalTabs(props) {
   const { questions, name, quizCode, ViewSubmissionCode } = props;
   const [answersList, setAnswersList] = React.useState(
@@ -92,6 +109,8 @@ export default function VerticalTabs(props) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const [reaction, setReaction] = React.useState();
 
   const questionsSizeArray = Array(questions.length).fill(0);
 
@@ -119,8 +138,87 @@ export default function VerticalTabs(props) {
       });
   };
 
+  const videoRef = React.useRef();
+
+  const setValueD = debounce((value) => setValue(value), 200);
+
+  const getValue = () => value;
+
+  function drawKeypoints(keypoints) {
+    const keypointsArray = keypoints;
+
+    for (let i = 0; i < keypointsArray.length; i++) {
+      const y = keypointsArray[i][0];
+      const x = keypointsArray[i][1];
+    }
+
+    const fingers = Object.keys(fingerLookupIndices);
+    for (let i = 0; i < fingers.length; i++) {
+      const finger = fingers[i];
+      const points = fingerLookupIndices[finger].map((idx) => keypoints[idx]);
+
+      if (i == 0) {
+        if (points[0][1] > points[4][1] + 70) {
+          setReaction('👍');
+          setTimeout(() => setReaction(null), 10000);
+
+          if (value < questions.length && value > 0) {
+            let d = getValue();
+            setValueD(d - 1);
+          }
+        } else if (points[0][1] < points[4][1] - 49) {
+          console.log(value);
+          setReaction('👎');
+          setTimeout(() => setReaction(null), 10000);
+          if (value > -1 && value < questions.length - 1) {
+            let d = getValue();
+            setValueD(d + 1);
+          }
+        } else {
+          setReaction(null);
+        }
+      }
+    }
+  }
+
+  React.useEffect(async () => {
+    const stream = await window.navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: 'user',
+        width: 320,
+        height: 250,
+      },
+    });
+    videoRef.current.srcObject = stream;
+    videoRef.current.play();
+    await tf.setBackend('webgl');
+    model = await handpose.load();
+
+    const landmarksRealTime = async (video) => {
+      async function frameLandmarks() {
+        const predictions = await model.estimateHands(video);
+
+        if (predictions.length > 0) {
+          const result = predictions[0].landmarks;
+          drawKeypoints(result, predictions[0].annotations, value);
+        }
+        rafID = requestAnimationFrame(frameLandmarks);
+      }
+
+      frameLandmarks();
+    };
+    setTimeout(() => landmarksRealTime(videoRef.current), 700);
+  }, []);
+
+  console.log(value);
+
   return (
     <div className={classes.root + ' absolute'}>
+      <video className="fixed top-0 right-0" playsInline ref={videoRef} />
+      <div className="fixed top-0 right-0 mt-48 mr-20 text-6xl">
+        {reaction ? reaction : ''}
+      </div>
       {isSubmitted ? (
         'Successfully Submitted 🤟🏻'
       ) : (
@@ -146,6 +244,7 @@ export default function VerticalTabs(props) {
               index={index}
             />
           ))}
+
           {value === questions.length - 1 ? (
             <Button
               onClick={onSubmit}
