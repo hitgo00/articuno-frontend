@@ -23,7 +23,7 @@ const QuizBuilder = () => {
   };
 
   const onSubmit = () => {
-    fetch('http://localhost:4949/addQuiz', {
+    fetch(`${process.env.REACT_APP_SERVER_URL}/addQuiz`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

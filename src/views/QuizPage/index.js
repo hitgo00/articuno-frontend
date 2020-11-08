@@ -21,7 +21,7 @@ const QuizPage = (props) => {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:4949/addQuiz/${quizCode}`)
+    fetch(`${process.env.REACT_APP_SERVER_URL}/addQuiz/${quizCode}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);

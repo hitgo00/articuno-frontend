@@ -117,7 +117,7 @@ export default function VerticalTabs(props) {
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const onSubmit = () => {
     console.log(ViewSubmissionCode);
-    fetch('http://localhost:4949/submission', {
+    fetch(`${process.env.REACT_APP_SERVER_URL}/submission`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,18 +156,18 @@ export default function VerticalTabs(props) {
       if (i == 0) {
         if (points[0][1] > points[4][1] + 70) {
           setReaction('👍');
-          setTimeout(() => setReaction(null), 10000);
+          setTimeout(() => setReaction(null), 1000);
 
           if (value < questions.length && value > 0) {
             let d = value;
-            setValue(d - 1);
+            setTimeout(() => setValue(value - 1), 100);
           }
         } else if (points[0][1] < points[4][1] - 49) {
           setReaction('👎');
-          setTimeout(() => setReaction(null), 10000);
+          setTimeout(() => setReaction(null), 1000);
           if (value > -1 && value < questions.length - 1) {
             let d = value;
-            setValue(d + 1);
+            setTimeout(() => setValue(value + 1), 100);
           }
         } else {
           setReaction(null);
@@ -216,7 +216,7 @@ export default function VerticalTabs(props) {
       </div>
       {isSubmitted ? (
         <div className="flex flex-col">
-          {`Successfully Submitted 🤟🏻, `}
+          {`Successfully Submitted 🤟🏻`}
           <br />
           <Link to="/">
             <Button className="mt-4"> Back to home</Button>
