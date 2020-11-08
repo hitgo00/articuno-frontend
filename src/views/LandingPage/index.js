@@ -13,6 +13,9 @@ const LandingPage = () => {
   const [quizCode, setQuizCode] = React.useState('');
   const [subCode, setSubCode] = React.useState('');
 
+  const lastQuizCode = localStorage.getItem('QuizCode');
+  const lastQuizSubCode = localStorage.getItem('ViewSubmissionCode');
+
   return (
     <div
       className={css`
@@ -52,6 +55,18 @@ const LandingPage = () => {
             </IconButton>
           }
         />
+      </div>
+
+      <div className="mt-20 max-w-sm">
+        {lastQuizCode ? (
+          <div>
+            {`Last created Quiz Code:${lastQuizCode}`}
+            <br />
+            {`Last created Submission Code:${lastQuizSubCode}`}
+          </div>
+        ) : (
+          ``
+        )}
       </div>
     </div>
   );

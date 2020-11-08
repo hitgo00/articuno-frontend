@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import _ from 'lodash';
+import { Link } from '@reach/router';
 import QuestionCard from '../../components/QuestionCard';
 import QuestionHandler from '../../components/QuestionHandler';
 import { Button, Typography } from '@material-ui/core';
@@ -34,6 +35,8 @@ const QuizBuilder = () => {
         console.log('Success:', data);
         setQuizCode(data['QuizCode']);
         setViewSubmissionCode(data['ViewSubmissionCode']);
+        localStorage.setItem('ViewSubmissionCode', data['ViewSubmissionCode']);
+        localStorage.setItem('QuizCode', data['QuizCode']);
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -43,10 +46,13 @@ const QuizBuilder = () => {
   return (
     <div className="mt-20 ml-64">
       {quizCode ? (
-        <Typography className="font-thin">
+        <Typography className=" flex flex-col font-thin">
           Your quiz code is: {quizCode} <br />
           To view submissions for this quiz, note this submission code:{' '}
           {ViewSubmissionCode}
+          <Link to="/">
+            <Button className="mt-4"> Back to home</Button>
+          </Link>
         </Typography>
       ) : (
         <>

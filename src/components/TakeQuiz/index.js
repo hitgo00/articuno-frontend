@@ -1,5 +1,6 @@
 import React from 'react';
-import _, { debounce } from 'lodash';
+import _ from 'lodash';
+import { Link } from '@reach/router';
 import { makeStyles } from '@material-ui/core/styles';
 import c from 'classnames';
 import { css } from 'emotion';
@@ -17,7 +18,6 @@ import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 let model;
 let ctx;
-// const stats = new Stats();
 let rafID;
 
 const fingerLookupIndices = {
@@ -140,10 +140,6 @@ export default function VerticalTabs(props) {
 
   const videoRef = React.useRef();
 
-  const setValueD = debounce((value) => setValue(value), 200);
-
-  const getValue = () => value;
-
   function drawKeypoints(keypoints) {
     const keypointsArray = keypoints;
 
@@ -163,16 +159,15 @@ export default function VerticalTabs(props) {
           setTimeout(() => setReaction(null), 10000);
 
           if (value < questions.length && value > 0) {
-            let d = getValue();
-            setValueD(d - 1);
+            let d = value;
+            setValue(d - 1);
           }
         } else if (points[0][1] < points[4][1] - 49) {
-          console.log(value);
           setReaction('👎');
           setTimeout(() => setReaction(null), 10000);
           if (value > -1 && value < questions.length - 1) {
-            let d = getValue();
-            setValueD(d + 1);
+            let d = value;
+            setValue(d + 1);
           }
         } else {
           setReaction(null);
@@ -201,7 +196,7 @@ export default function VerticalTabs(props) {
 
         if (predictions.length > 0) {
           const result = predictions[0].landmarks;
-          drawKeypoints(result, predictions[0].annotations, value);
+          drawKeypoints(result, predictions[0].annotations);
         }
         rafID = requestAnimationFrame(frameLandmarks);
       }
@@ -220,7 +215,13 @@ export default function VerticalTabs(props) {
         {reaction ? reaction : ''}
       </div>
       {isSubmitted ? (
-        'Successfully Submitted 🤟🏻'
+        <div className="flex flex-col">
+          {`Successfully Submitted 🤟🏻, `}
+          <br />
+          <Link to="/">
+            <Button className="mt-4"> Back to home</Button>
+          </Link>
+        </div>
       ) : (
         <>
           <Tabs
